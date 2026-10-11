@@ -5,6 +5,7 @@ accelerate
 bitsandbytes
 pymupdf
 opencv-python-headless
+python-docx
 pillow
 fastapi
 uvicorn[standard]

@@ -7,7 +7,19 @@ API — один эндпоинт:
 
 ```
 POST /ocr   (multipart/form-data, поле file — PDF)
-→ {"1": "текст страницы 1", "2": "текст страницы 2", ...}
+→ {
+    "pages": {"1": "текст страницы 1", "2": "текст страницы 2", ...},
+    "docx": "<Word-документ по всем страницам, base64>"
+  }
+```
+
+Текст страниц — в разметке Markdown (заголовки `#`, таблицы `| ... |`). Word-документ собирается
+из всех страниц: заголовки, таблицы, каждая страница PDF с новой страницы, альбомные — в альбомной ориентации.
+
+Сохранить Word из ответа:
+
+```bash
+curl -s -F "file=@document.pdf" http://localhost:8000/ocr | python -c "import sys,json,base64; open('result.docx','wb').write(base64.b64decode(json.load(sys.stdin)['docx']))"
 ```
 
 ## Установка (Windows, NVIDIA GPU)
@@ -33,7 +45,7 @@ py -3.12 -m venv .venv
 curl -F "file=@document.pdf" http://localhost:8000/ocr
 ```
 
-Прогон без сервера (результат в `results/<имя>.json`):
+Прогон без сервера (результат в `results/<имя>.json` и `results/<имя>.docx`):
 
 ```powershell
 .venv\Scripts\python scripts\run_local.py "путь\к\файлу.pdf"
@@ -62,7 +74,8 @@ curl -F "file=@document.pdf" http://localhost:8000/ocr
 4. `app/ocr.py` — модель загружается один раз при старте, на каждую полосу одна генерация
    с промптом из `app/config.py`. При зацикливании генерация обрывается и повторяется
    с более сильным штрафом за повторы.
-5. `app/main.py` — FastAPI-эндпоинт `/ocr`, тексты полос склеиваются в текст страницы.
+5. `app/docx_export.py` — сборка Word из Markdown-разметки (таблицы, разрезанные на полосы, склеиваются).
+6. `app/main.py` — FastAPI-эндпоинт `/ocr`.
 
 ## Ограничения
 

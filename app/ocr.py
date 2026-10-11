@@ -18,6 +18,7 @@ from transformers import (
 )
 
 from app import config
+from app.docx_export import Page
 from app.pdf import horizontal_text_ratio, split_strips
 
 
@@ -49,16 +50,18 @@ class OCREngine:
         self._lock = threading.Lock()
 
     @torch.inference_mode()
-    def recognize_page(self, page: Image.Image) -> str:
+    def recognize_page(self, page: Image.Image) -> Page:
         with self._lock:
-            if self._is_sideways(page):
+            landscape = self._is_sideways(page)
+            if landscape:
                 # Альбомные страницы в образцах подшиты так, что текст идёт снизу вверх:
                 # поворачиваем на 90° по часовой стрелке
                 page = page.rotate(270, expand=True)
             texts = [self._recognize(strip) for strip in split_strips(page)]
             # Освобождаем кеш аллокатора: иначе фрагментация на 8 ГБ GPU уводит память в shared RAM
             torch.cuda.empty_cache()
-        return "\n".join(t for t in texts if t.replace("[неразборчиво]", "").strip())
+        text = "\n".join(t for t in texts if t.replace("[неразборчиво]", "").strip())
+        return Page(text=text, landscape=landscape)
 
     def _inputs(self, image: Image.Image):
         messages = [{
