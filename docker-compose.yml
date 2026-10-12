@@ -1,0 +1,17 @@
+services:
+  ocr:
+    image: ocr-offline:latest
+    ports:
+      - "8000:8000"
+    environment:
+      # GPU 8–16 ГБ: 4bit и 1200000. GPU от 24 ГБ (L4, A10, A100, H100): none и 4000000
+      OCR_QUANT: "4bit"
+      OCR_MAX_PIXELS: "1200000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
