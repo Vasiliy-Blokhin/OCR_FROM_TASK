@@ -4,6 +4,6 @@
 dist
 results
 **/__pycache__
+vendor/site-packages
+vendor/python
 models/*/.cache
-# В образ попадает только модель из ARG MODEL; остальные исключаем, чтобы не гонять их в контекст сборки
-models/Qwen3-VL-4B-Instruct
