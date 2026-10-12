@@ -1,13 +1,16 @@
 --extra-index-url https://download.pytorch.org/whl/cu128
 torch==2.11.0+cu128
+torchvision==0.26.0+cu128
 transformers==5.19.0
-accelerate
-bitsandbytes
-pymupdf
-opencv-python-headless
-python-docx
-pillow
-fastapi
-uvicorn[standard]
-python-multipart
-huggingface_hub
+accelerate==1.15.0
+bitsandbytes==0.50.2
+huggingface_hub==2.2.0
+numpy==2.5.2
+pymupdf==1.28.2
+opencv-python-headless==5.0.0.93
+python-docx==1.2.0
+pillow==12.3.0
+fastapi==0.143.0
+pydantic==2.14.0
+uvicorn[standard]==0.54.0
+python-multipart==0.0.32

@@ -22,7 +22,19 @@ POST /ocr   (multipart/form-data, поле file — PDF)
 curl -s -F "file=@document.pdf" http://localhost:8000/ocr | python -c "import sys,json,base64; open('result.docx','wb').write(base64.b64decode(json.load(sys.stdin)['docx']))"
 ```
 
-## Установка (Windows, NVIDIA GPU)
+## Контейнер (офлайн-контур)
+
+На машине с интернетом и Docker:
+
+```bash
+./scripts/build_bundle.sh
+```
+
+Скрипт скачивает модель (если её нет в `models/`), собирает образ и кладёт в `dist/` архив образа
+`ocr-offline.tar.gz` (~22 ГБ, модель внутри), `docker-compose.yml` и `DEPLOY.md`. Папку `dist/` переносят
+в контур; запуск и требования к серверу описаны в [DEPLOY.md](DEPLOY.md).
+
+## Установка для разработки (Windows, NVIDIA GPU)
 
 Нужен Python 3.12 (на 3.14 нет сборок torch с CUDA).
 

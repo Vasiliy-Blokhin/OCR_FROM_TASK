@@ -18,7 +18,8 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="OCR", lifespan=lifespan)
+# Только один эндпоинт: служебные /docs и /openapi.json отключены
+app = FastAPI(title="OCR", lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
 
 
 class OCRResult(BaseModel):
