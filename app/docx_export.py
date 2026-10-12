@@ -40,6 +40,8 @@ def _is_separator(cells: list[str]) -> bool:
 def _blocks(text: str):
     """Разбивает текст на блоки: ("heading", level, text), ("table", rows, header), ("para", text)."""
     lines = [line.strip() for line in text.splitlines()]
+    # Модель иногда ставит «#» перед строкой таблицы — это строка таблицы, а не заголовок
+    lines = [line.lstrip("#").strip() if line.startswith("#") and line.count("|") >= 2 else line for line in lines]
     i = 0
     while i < len(lines):
         line = lines[i]

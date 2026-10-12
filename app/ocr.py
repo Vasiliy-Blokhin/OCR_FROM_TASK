@@ -29,7 +29,11 @@ class OCREngine:
         if AutoConfig.from_pretrained(config.MODEL_PATH).tie_word_embeddings:
             skip.append("lm_head")
         quant = None
-        if config.QUANT == "4bit":
+        use_cuda = torch.cuda.is_available()
+        if not use_cuda:
+            # bitsandbytes 4/8-bit работает только на GPU; без GPU модель грузится в bf16 (медленно)
+            print("GPU не найден: работа на CPU, без квантизации", flush=True)
+        elif config.QUANT == "4bit":
             quant = BitsAndBytesConfig(
                 load_in_4bit=True,
                 bnb_4bit_quant_type="nf4",
@@ -43,7 +47,7 @@ class OCREngine:
         self.model = AutoModelForImageTextToText.from_pretrained(
             config.MODEL_PATH,
             dtype=torch.bfloat16,
-            device_map="cuda" if torch.cuda.is_available() else "cpu",
+            device_map="cuda" if use_cuda else "cpu",
             quantization_config=quant,
         ).eval()
         # Модель одна на процесс — запросы к GPU выполняем по очереди

@@ -1,5 +1,6 @@
 services:
   ocr:
+    build: .
     image: ocr-offline:latest
     ports:
       - "8000:8000"
