@@ -14,7 +14,7 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-FILES = ["main.py", "start.sh", "requirements.lock", "requirements.txt", "README.md", "DEPLOY.md",
+FILES = ["main.py", "start.sh", "restart.sh", "requirements.lock", "requirements.txt", "README.md", "DEPLOY.md",
          "Dockerfile", "docker-compose.yml", ".dockerignore", "vendor/python.tar.gz"]
 DIRS = ["app", "vendor/wheels"]
 SKIP = {"__pycache__", ".cache"}
