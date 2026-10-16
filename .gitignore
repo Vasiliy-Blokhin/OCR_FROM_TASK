@@ -12,6 +12,7 @@ build/
 develop-eggs/
 dist/
 vendor/
+logs/
 downloads/
 eggs/
 .eggs/
@@ -225,3 +226,4 @@ models/
 results/
 dist/
 vendor/
+logs/
