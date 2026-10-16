@@ -7,6 +7,8 @@ from docx import Document
 from docx.enum.section import WD_ORIENT, WD_SECTION
 from docx.shared import Cm, Pt, RGBColor
 
+from app.tables import is_separator, is_table_row, split_row
+
 
 @dataclass
 class Page:
@@ -14,27 +16,8 @@ class Page:
     landscape: bool = False
 
 
-# Разделитель шапки Markdown-таблицы: |---|:---:|
-_SEPARATOR_CELL = re.compile(r"^:?-{3,}:?$")
 _HEADING = re.compile(r"^(#{1,6})\s+(.*)$")
 _BOLD = re.compile(r"\*\*(.+?)\*\*")
-
-
-def _is_table_row(line: str) -> bool:
-    return line.startswith("|") or line.count("|") >= 2
-
-
-def _split_row(line: str) -> list[str]:
-    line = line.strip()
-    if line.startswith("|"):
-        line = line[1:]
-    if line.endswith("|"):
-        line = line[:-1]
-    return [cell.strip() for cell in line.split("|")]
-
-
-def _is_separator(cells: list[str]) -> bool:
-    return all(_SEPARATOR_CELL.match(c) for c in cells if c) and any(cells)
 
 
 def _blocks(text: str):
@@ -51,11 +34,11 @@ def _blocks(text: str):
         if m := _HEADING.match(line):
             yield "heading", len(m.group(1)), m.group(2)
             i += 1
-        elif _is_table_row(line):
+        elif is_table_row(line):
             rows, header = [], False
-            while i < len(lines) and lines[i] and _is_table_row(lines[i]):
-                cells = _split_row(lines[i])
-                if _is_separator(cells):
+            while i < len(lines) and lines[i] and is_table_row(lines[i]):
+                cells = split_row(lines[i])
+                if is_separator(cells):
                     header = header or len(rows) == 1
                 else:
                     rows.append(cells)
@@ -74,7 +57,7 @@ def _merge_tables(blocks: list) -> list:
         prev = merged[-1] if merged else None
         if (
             block[0] == "table" and prev and prev[0] == "table"
-            and len(block[1][0]) == len(prev[1][0])
+            and max(map(len, block[1])) == max(map(len, prev[1]))
         ):
             rows = block[1]
             # Повтор шапки в продолжении таблицы не дублируем
