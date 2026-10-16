@@ -37,6 +37,8 @@ curl -s -F "file=@document.pdf" http://localhost:8000/ocr | python -c "import sy
    ```
    (или `python3.12 ocr/main.py`, если в контейнере есть Python 3.12).
 
+Обновление: `git pull`, затем `sh restart.sh` — перезапускает только сервис этой папки.
+
 Подробности и требования к серверу — в [DEPLOY.md](DEPLOY.md).
 
 ## Установка для разработки (Windows, NVIDIA GPU)

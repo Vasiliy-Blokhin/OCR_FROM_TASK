@@ -4,7 +4,9 @@
 затем поднимает HTTP-сервер с эндпоинтом POST /ocr на 0.0.0.0:8000.
 Порт и адрес задаются переменными OCR_HOST / OCR_PORT.
 """
+import hashlib
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -21,11 +23,23 @@ def ensure_dependencies():
             f"Нужен Python 3.12 (сейчас {sys.version.split()[0]}): пакеты в vendor/wheels собраны под 3.12. "
             "Запустите ./start.sh — он использует встроенный Python из vendor/python."
         )
+    # В пометке об установке хранится отпечаток requirements.lock: если после git pull
+    # список пакетов изменился, пакеты переустанавливаются
+    lock_hash = hashlib.sha256((ROOT / "requirements.lock").read_bytes()).hexdigest()
     if MARKER.exists():
-        return
+        installed = MARKER.read_text().strip()
+        if not installed:  # пометка старой версии без отпечатка — считаем, что установлен текущий список
+            MARKER.write_text(lock_hash)
+            return
+        if installed == lock_hash:
+            return
     if not WHEELS.is_dir():
         sys.exit("Нет vendor/wheels: подготовьте проект командой python scripts/prepare_offline.py")
-    print("Первый запуск: установка зависимостей из vendor/wheels (без интернета)...", flush=True)
+    if SITE.exists():
+        print("requirements.lock изменился: переустановка зависимостей из vendor/wheels...", flush=True)
+        shutil.rmtree(SITE)
+    else:
+        print("Первый запуск: установка зависимостей из vendor/wheels (без интернета)...", flush=True)
     # pip запускается прямо из своего колеса: в контейнере pip может быть не установлен
     pip_wheel = next(WHEELS.glob("pip-*.whl"))
     subprocess.run(
@@ -38,7 +52,7 @@ def ensure_dependencies():
         ],
         check=True,
     )
-    MARKER.touch()
+    MARKER.write_text(lock_hash)
 
 
 def main():
